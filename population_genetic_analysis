@@ -1,21 +1,120 @@
-1.群体遗传结构分析
-
-
-
-# plink转化格式
+1.群体遗传结构分析(admixture)
+待添加
+########################################################PCA##################################################################
+2. PCA 主成分分析(GCTA, genome-wide complex traits analysis)
+2.1 plink转化格式
 plink --file (ped, map)
 plink --bfile (bed)
 
 vcf转二进制文件bed：
 plink --vcf test.vcf --allow-extra-chr --make-bed --out test
 
-构建ped，map以及.bin格式，gcta可识别
+构建ped，map以及gcta可识别的.bin格式，
 plink --bfile test --allow-extra-chr --recode --out test
+
+根据SNP关系计算遗传关系矩阵(Genetic relationship matrix, GRM)：
 plink --file test --allow-extra-chr --make-grm-bin --out test --autosome-num 20
+还可以使用gcta64 --bfile test --make-grm --make-grm-alg 1 --out test_  (默认的Yang 方法：--make-grm-alg 0  Van的方法：--make-grm-alg 1)
+但是在计算中发现使用gcta64时，染色体名称必须是chr，而测试文件是scaffold，所以测试时使用了plink计算遗传关系矩阵
 
 #主成分分析:
-1. 根据SNP关系计算遗传关系矩阵：
-
 gcta64 --grm test --pca 20 --out pca
 pca.eigenval 特征值
 pca.eigenvec 特征向量
+
+#PCA_Fig
+提取前三个特征向量R画图:
+setwd("/vol/liubin/NX15/QC_variants/filtered_snp_indel/test_pca")
+
+# 处理特征向量文件
+eigenvec <- read.table("pca.eigenvec", quote="\"", comment.char="")
+colnames(eigenvec)<-c("FID","sample",paste0("PC",1:20))  # 添加列名称
+write.table(eigenvec[2:ncol(eigenvec)],file = "pca.eigenvector.tsv",sep = "\t",row.names = F,col.names = T,quote = F)
+
+# 处理特征值文件
+eigenval <- read.table("pca.eigenval", quote="\"", comment.char="")
+pcs<-paste0("pc",1:nrow(eigenval))
+eigenval[nrow(eigenval),1]<-0  # 最后一行第一列修改为 0
+
+# 计算解释率
+percentage<-eigenval$V1/sum(eigenval$V1)*100  # 每个值除以均值*100
+
+eigenval_df<-as.data.frame(cbind(pcs,eigenval[,1],percentage),stringsAsFactors = F)  # 合并数据框
+names(eigenval_df)<-c("pcs","variance","proportation")
+eigenval_df$variance<-as.numeric(eigenval_df$variance)
+eigenval_df$proportation<-as.numeric(eigenval_df$proportation)
+write.table(eigenval_df,file = "pca.eigenvalue.tsv",sep = "\t",quote = F,row.names = F,col.names = T)
+head(eigenval_df)
+
+eigvec <-read.table("pca.eigenvector.tsv",header = T)
+eigval <- read.table("pca.eigenvalue.tsv",header = T)
+# 整理pop文件，order为序号，group为群体结构分群结果(group分组；color每个组的颜色，pch每个组点的形状）
+popinfo <- read.csv("pop.csv")
+head(popinfo)
+
+# 查看pop文件
+'''
+order exp_id vcf_id group   color pch
+1     1      1      1    G2 #9ACD32  16
+2     2      2      2    G2 #9ACD32  16
+3     3      3      3    G2 #9ACD32  16
+4     4      4      4    G2 #9ACD32  16
+5     5      5      5    G2 #9ACD32  16
+6     6      6      6    G2 #9ACD32  16
+'''
+pop <- unique(popinfo[,2:4])
+print(pop)
+'''
+group   color pch
+1     G2 #9ACD32  16
+55    G1 #FF4500  15
+62    G3 #6495ED  17
+'''
+
+# 3Dfig
+library("ggplot2")
+group=popinfo$group
+pch=popinfo$pch
+color=popinfo$color
+pdf("pca_pc1 vs. pc2.pdf", width = 8,height = 6)
+p <- ggplot(data = eigvec, aes(x = PC1, y = PC2, group = group)) +
+  geom_point(alpha = 1,col=color,pch=pch)+
+  stat_ellipse(geom = "polygon",alpha=0.5,level = 0.95,aes(fill=group))+ #置信区间
+  geom_hline(yintercept = 0, linetype = "dashed", color = "grey",size=1)+
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey",size=1)+
+  theme_bw()+
+  theme(panel.grid = element_blank())+
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1.5))+ #边框
+  theme(legend.text = element_text(size = 16, face = "bold.italic"),legend.title = element_blank())+ #图例
+  xlab(paste0("PC1 (", round(eigval[eigval$pcs == "pc1", 3], 2), "%)"))+ ylab(paste0("PC2 (", round(eigval[eigval$pcs == "pc2", 3], 2), "%)")) +  # 添加PC123的解释率，根据pca.eigenval文件
+  theme(axis.title.x = element_text(face = "bold", size = 18, colour = "black"),axis.title.y = element_text(face = "bold", size = 18, colour = "black"),axis.text.x = element_text(size = 14,face = "bold", colour = "black"),axis.text.y = element_text(face = "bold", size = 14, colour = "black"))
+print(p)
+dev.off()
+
+
+library(scatterplot3d)
+library(grDevices)
+x_lab <- paste0("PC1 (", round(eigval[eigval$pcs == "pc1", 3], 2), "%)")
+y_lab <- paste0("PC2 (", round(eigval[eigval$pcs == "pc2", 3], 2), "%)")
+z_lab <- paste0("PC3 (", round(eigval[eigval$pcs == "pc3", 3], 2), "%)")
+pdf("pca_3d.pdf",width = 8,height = 6)
+scatterplot3d(x =eigvec$PC1, y = eigvec$PC2, z=eigvec$PC3, 
+              color = color,pch = pch,
+              xlab=x_lab, ylab=y_lab, zlab=z_lab,
+              angle=45,type = "p",
+              mar = c(3.5,3.5,3.5,6),
+              cex.symbols = 1.5, cex.axis = 1, cex.lab = 1.5,
+              font.axis = 2, font.lab = 2, scale.y = 1)
+legend("topright", legend = pop$group,
+        col = pop$color, 
+        pch = pop$pch, 
+        inset = -0.1, xpd = TRUE, horiz = TRUE)
+dev.off()
+
+
+########################################################## tree ######################################################
+3. 系统发育分析(VCF2Dis)
+3.1 计算遗传距离矩阵：
+VCF2Dis -InPut in.vcf.gz -OutPut p_dis.mat
+3.2 iTOL美化
+待添加脚本
