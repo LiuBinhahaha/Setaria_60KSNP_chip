@@ -15,7 +15,7 @@ or: for k in {1..10}; do admixture --cv ./test.bed $k | tee log$k.out; done  # t
 admixture -B ./test.bed 3 -j10
 explain: -B 除了使用point estimation，还将使用bootstrapping procedure 去估计standard errors，但是这个过程很耗费时间
           3 k值
-          -j threas number，j和数字间不能有空格
+          -j threads number，j和数字间不能有空格
 ##attention:: 如果标记数量非常大，因为标记间的LD会导致标记冗余，增加计算时间，所以要适当的缩减标记数目（根据标记间的LD关系 r2）：
               plink --bfile rawdata --indep-pairwise 50 10 0.1
 ##explain::   bfile 二进制文件bed
