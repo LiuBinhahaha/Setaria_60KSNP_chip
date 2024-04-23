@@ -1,1 +1,28 @@
-plink
+# 随机从每个LD block中挑选一个SNP添加到候选集中
+
+1. plink对100Kb以内的SNP计算成对LD
+plink --bfile add_ID_vcf --ld-window-kb 100 --blocks no-pheno-req
+explain：
+--ld-window-kb 默认是200Kb，其他相应的参数：--ld-window [ct+1]  --ld-window-cm (cM)   --ld-window-r2
+vcf转二进制前必须要将ID填充上，格式为Chr_Pos：
+#Python：
+import re
+file = open("/vol/liubin/data/60K_chip/filter_part.vcf", 'r')  # 测试
+out = open("/vol/liubin/data/60K_chip/add_ID_filter_part.vcf", 'w')
+
+for line in file:
+    if line.startswith("#"):
+        _line = line.rstrip()
+        out.write(_line + '\n')
+    else:
+        _line = line.rstrip().split('\t')
+        ID = f'{_line[0]}_{_line[1]}'
+        out.write('\t'.join(_line[0:2]) + '\t' + ID + '\t' + '\t'.join(_line[3:]) + '\n')
+
+file.close()
+out.close()
+
+2. 从每个block中随机抽取1-2个SNP
+Python：
+import re
+file = open("")
