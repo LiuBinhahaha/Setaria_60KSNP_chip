@@ -1,1 +1,21 @@
-主成分分析
+1.群体遗传结构分析
+
+
+
+# plink转化格式
+plink --file (ped, map)
+plink --bfile (bed)
+
+vcf转二进制文件bed：
+plink --vcf test.vcf --allow-extra-chr --make-bed --out test
+
+构建ped，map以及.bin格式，gcta可识别
+plink --bfile test --allow-extra-chr --recode --out test
+plink --file test --allow-extra-chr --make-grm-bin --out test --autosome-num 20
+
+#主成分分析:
+1. 根据SNP关系计算遗传关系矩阵：
+
+gcta64 --grm test --pca 20 --out pca
+pca.eigenval 特征值
+pca.eigenvec 特征向量
