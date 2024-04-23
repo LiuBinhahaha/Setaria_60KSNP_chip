@@ -18,9 +18,10 @@ explain: -B 除了使用point estimation，还将使用bootstrapping procedure �
           -j threads number，j和数字间不能有空格
 ##attention:: 如果标记数量非常大，因为标记间的LD会导致标记冗余，增加计算时间，所以要适当的缩减标记数目（根据标记间的LD关系 r2）：
               plink --bfile rawdata --indep-pairwise 50 10 0.1
+        or:   plink --vcf rawdata.cvf --const-fid --allow-extra-chr --indep-pairwise 50 10 0.5 --out core_snp
 ##explain::   bfile 二进制文件bed
               --indep-pairwise  removal each SNP that has an R2 value of greater than 0.1 with any other SNP within a 50-SNP sliding window (step 10 SNPs each time)
-
+              --const-fid 避免将输入数据中的样本家族ID、个体ID以及父母ID进行检查，并保持输入的文件格式
 #################################################### # PCA ################################################################
 2. PCA 主成分分析(GCTA, genome-wide complex traits analysis)
 根据SNP关系计算遗传关系矩阵(Genetic relationship matrix, GRM)，格式为gcta可识别的.bin格式：
