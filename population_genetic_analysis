@@ -1,26 +1,37 @@
-1.群体遗传结构分析(admixture)
-待添加
-########################################################PCA##################################################################
-2. PCA 主成分分析(GCTA, genome-wide complex traits analysis)
-2.1 plink转化格式
+格式转换
 plink --file (ped, map)
 plink --bfile (bed)
+#vcf 2 bfile: plink --vcf test.vcf --allow-extra-chr --make-bed --out test
+#bfile 2 ped: plink --bfile test --allow-extra-chr --rocode --out test
 
-vcf转二进制文件bed：
-plink --vcf test.vcf --allow-extra-chr --make-bed --out test
+##################################################### admixture ############### ############################################
+1.群体遗传结构分析(admixture)
+1.1 计算不同k值的cross validation error， 选择cv-error最小时的K值作为最佳的群体分成数；或者是根据自己的材料自己确定最佳的分群数；
+    for k in {1..10}; do admixture --cv ./test.bed(需要在vcf中替换scaffold为Chr，否则admixture不识别) $k > log$k.out 2>&1; done
+or: for k in {1..10}; do admixture --cv ./test.bed $k | tee log$k.out; done  # tee 命令的功能是将输入（即 admixture --cv hapmap3.bed $K 命令的输出）同时写入 log${K}.out 文件，并在终端上显示出来。
+查看每个k的cv error：grep 'CV error' log*.out
 
-构建ped，map以及gcta可识别的.bin格式，
-plink --bfile test --allow-extra-chr --recode --out test
+1.2 获得最佳分群数后，计算该k值下的群体结构：
+admixture -B ./test.bed 3 -j10
+explain: -B 除了使用point estimation，还将使用bootstrapping procedure 去估计standard errors，但是这个过程很耗费时间
+          3 k值
+          -j threas number，j和数字间不能有空格
+##attention:: 如果标记数量非常大，因为标记间的LD会导致标记冗余，增加计算时间，所以要适当的缩减标记数目（根据标记间的LD关系 r2）：
+              plink --bfile rawdata --indep-pairwise 50 10 0.1
+##explain::   bfile 二进制文件bed
+              --indep-pairwise  removal each SNP that has an R2 value of greater than 0.1 with any other SNP within a 50-SNP sliding window (step 10 SNPs each time)
 
-根据SNP关系计算遗传关系矩阵(Genetic relationship matrix, GRM)：
+#################################################### # PCA ################################################################
+2. PCA 主成分分析(GCTA, genome-wide complex traits analysis)
+根据SNP关系计算遗传关系矩阵(Genetic relationship matrix, GRM)，格式为gcta可识别的.bin格式：
 plink --file test --allow-extra-chr --make-grm-bin --out test --autosome-num 20
 还可以使用gcta64 --bfile test --make-grm --make-grm-alg 1 --out test_  (默认的Yang 方法：--make-grm-alg 0  Van的方法：--make-grm-alg 1)
 但是在计算中发现使用gcta64时，染色体名称必须是chr，而测试文件是scaffold，所以测试时使用了plink计算遗传关系矩阵
 
-#主成分分析:
-gcta64 --grm test --pca 20 --out pca
-pca.eigenval 特征值
-pca.eigenvec 特征向量
+2.1主成分分析: 
+  gcta64 --grm test --pca 20 --out pca
+  pca.eigenval 特征值
+  pca.eigenvec 特征向量
 
 #PCA_Fig
 提取前三个特征向量R画图:
