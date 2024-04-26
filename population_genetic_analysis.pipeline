@@ -30,6 +30,88 @@ plink --allow-extra-chr --extract sample_core_ld_flited1.prune.in \
 --make-bed --out sample_core_ld_filted2 \
  --recode vcf-iid --vcf sample_core.vcf
 
+#population_figs
+# install pophelper package from GitHub
+# remotes::install_github('royfrancis/pophelper')
+library(pophelper)
+setwd("C:/Users/liubi/Desktop/population_anlaysis/file.structure")
+
+alist <- readQ(filetype="auto",list.files(path="C:/Users/liubi/Desktop/population_anlaysis/file.structure", full.names=T))
+
+plotQ(alist, 
+      exportpath=getwd(), 
+      imgoutput = "join", # 图片合并
+      sortind= "all", # 排序，基于聚类排序
+      height = 1.2, width = 20, 
+      linecol = 15, 
+      indlabcol = "black",  #k值文本颜色
+      showyaxis = TRUE,
+      showindlab = T, # 是否对每个K值图形绘制边框
+      useindlab = T, # 展示单株标签
+      indlabhjust = 0.5, # 单株标签水平居中
+      indlabangle = 0, # 单株标签角度
+      indlabsize = 1.2, # 单株标签文本大小
+      panelspacer = 0.02,   #不同k值图的间隙
+      indlabspacer = 0,  #不同k值图中单株空隙
+      imgtype="pdf",
+      splab = paste0("K=",1:5),  #k值标签
+      splabangle = 0,   #标签角度
+      dpi = 600,  #输出分辨率
+      outputfilename = paste0("test_pop"),  #输出文件的名称
+      #units = "cm",   #输出文件的大小
+      showlegend = TRUE,
+      showdiv = FALSE,
+      sharedindlab = FALSE
+      )
+
+
+#引入分组信息
+pop <- read.table('C:/Users/liubi/Desktop/population_anlaysis/group.txt', header = F, sep = '\t', stringsAsFactors = F,row.names = 1)
+pop
+
+P2 <- plotQ(alist,imgoutput = "join",
+            imgtype = "png",  #输出格式的变化
+            height = 1.2,width = 20,
+            showindlab = T,useindlab = T,sharedindlab = T,
+            showsp = T,sppos = "left",splab = paste0("K=",1:5),splabangle = 180,
+            showlegend = F,ordergrp = T,grplab = pop,   #添加分组
+            subsetgrp = LETTERS[1:5],  #添加组名
+            dpi = 600,
+            outputfilename = paste0("structure_barplot_pop1"),units = "cm",
+            exportpath = getwd())
+
+#K值图不会共享单株标签名,且只在 imgoutput = "join"时有效
+# 存放Q文件的文件夹只能放Q文件
+
+group.txt:
+1	A
+2	A
+3	A
+4	A
+5	A
+6	A
+7	A
+8	A
+9	A
+10	B
+11	B
+12	B
+13	B
+14	B
+15	B
+16	B
+17	B
+18	C
+19	C
+20	C
+21	C
+22	C
+23	C
+24	C
+25	C
+26	C
+
+
 
 #################################################### # PCA ################################################################
 2. PCA 主成分分析(GCTA, genome-wide complex traits analysis)
