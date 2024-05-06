@@ -1,8 +1,8 @@
 格式转换
 plink --file (ped, map)
 plink --bfile (bed)
-#vcf 2 bfile: plink --vcf test.vcf --allow-extra-chr --make-bed --out test
-#bfile 2 ped: plink --bfile test --allow-extra-chr --recode --out test
+#vcf2bfile: plink --vcf test.vcf --allow-extra-chr --make-bed --out test
+#bfile2ped: plink --bfile test --allow-extra-chr --recode --out test
 
 ##################################################### admixture ############### ############################################
 1.群体遗传结构分析(admixture)
