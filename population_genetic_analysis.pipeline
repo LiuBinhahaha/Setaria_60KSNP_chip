@@ -219,5 +219,26 @@ dev.off()
 3. 系统发育分析(VCF2Dis)
 3.1 计算遗传距离矩阵：
 VCF2Dis -InPut in.vcf.gz -OutPut p_dis.mat
-3.2 iTOL美化
-待添加脚本
+3.2 上传至FastMe2.0获得距离树文件 .nwk
+3.3 上传至iTOL美化，添加颜色。
+
+颜色文件格式：
+tree_color.txt
+TREE_COLORS				
+SEPARATOR TAB				
+DATA				
+C12	branch	#C30078	normal	1
+C13	branch	#C30078	normal	1
+C14	branch	#C30078	normal	1
+C15	branch	#C30078	normal	1
+C26	branch	#C30078	normal	1
+C28	branch	#C30078	normal	1
+C30	branch	#4370B4	normal	1
+C33	branch	#4370B4	normal	1
+C34	branch	#4370B4	normal	1
+C35	branch	#4370B4	normal	1
+C36	branch	#4370B4	normal	1
+C6	branch	#549F9A	normal	1
+C7	branch	#549F9A	normal	1
+C8	branch	#549F9A	normal	1
+
