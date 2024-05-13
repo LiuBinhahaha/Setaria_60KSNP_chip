@@ -46,7 +46,7 @@ plotQ(alist,
       linecol = 15, 
       indlabcol = "black",  #k值文本颜色
       showyaxis = TRUE,
-      showindlab = T, # 是否对每个K值图形绘制边框
+      showindlab = T, # 是否对每个K值图形绘制边框，是否显示个体名字
       useindlab = T, # 展示单株标签
       indlabhjust = 0.5, # 单株标签水平居中
       indlabangle = 0, # 单株标签角度
